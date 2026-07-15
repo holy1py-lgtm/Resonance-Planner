@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Novel Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="app">
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <h1 class="title-text">Story Bible</h1>
+      <button id="sidebar-toggle" title="Collapse">&#8676;</button>
+    </div>
+    <div id="sync-row">
+      <button class="sync-btn" id="export-btn" title="Download all your novel data as a file">&#8681; Export</button>
+      <button class="sync-btn" id="import-btn" title="Load a previously exported file">&#8679; Import</button>
+      <input type="file" id="import-file-input" accept="application/json">
+    </div>
+    <div id="sidebar-body"></div>
+  </div>
+
+  <div id="main">
+    <div id="main-header">
+      <div>
+        <h2 class="display">Chapter Timeline</h2>
+        <p>Drag a chapter card to reorder it. Click the corner arrow to shrink or expand a card, or click a card's body to edit it.</p>
+      </div>
+      <div id="header-actions">
+        <button class="header-btn" id="add-act-btn">&#43; Add Act</button>
+        <button class="header-btn" id="minimize-all-btn">&#8690; Minimize All</button>
+        <button class="header-btn" id="expand-all-btn">&#8689; Expand All</button>
+      </div>
+    </div>
+    <div id="timeline-wrap">
+      <div id="timeline-track"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="itemOverlay">
+  <div class="modal" id="itemModal"></div>
+</div>
+
+<div class="overlay" id="chapterOverlay">
+  <div class="modal" id="chapterModal" style="width:520px;"></div>
+</div>
+
+<div id="lightboxOverlay">
+  <button id="lightboxClose" title="Close">&times;</button>
+  <img id="lightboxImg" src="" alt="Full size image">
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
