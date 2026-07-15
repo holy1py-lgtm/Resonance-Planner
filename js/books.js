@@ -1,4 +1,5 @@
 import { escapeHtml, linkifyText, wireCodexLinks } from './codex.js';
+import { initAllExpandingTextareas } from './expandingTextarea.js';
 
 const app = () => window.app;
 
@@ -153,8 +154,10 @@ export function openItemModal(categoryKey, itemId) {
       <input type="text" id="im-name" value="${escapeHtml(item.name)}" placeholder="Name...">
     </div>
     <div class="field">
-      <label>Description</label>
-      <textarea id="im-desc" placeholder="Notes, backstory, traits...">${escapeHtml(item.desc || '')}</textarea>
+      <label>Description <button type="button" class="exp-toggle" data-target="im-desc" title="Expand">⤡</button></label>
+      <div class="exp-wrap" data-target="im-desc-wrap">
+        <textarea id="im-desc" placeholder="Notes, backstory, traits...">${escapeHtml(item.desc || '')}</textarea>
+      </div>
     </div>
     <div class="modal-actions">
       <div>${isNew ? '' : '<button class="btn btn-danger" id="im-delete">Delete</button>'}</div>
@@ -202,6 +205,8 @@ export function openItemModal(categoryKey, itemId) {
 
   renderImageField();
   document.getElementById('itemOverlay').classList.add('show');
+  // initialize expanding textarea behavior and focus
+  initAllExpandingTextareas(modal);
   document.getElementById('im-name').focus();
 
   document.getElementById('im-cancel').addEventListener('click', closeItemModal);

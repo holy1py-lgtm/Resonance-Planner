@@ -11,11 +11,15 @@ const CATS = [
 const CHAR_PALETTE = ['#c0654f', '#4f7a6b', '#7a5a8f', '#a68a3f', '#4f6f8f', '#8f4f6b', '#5f8f4f', '#3f8f8a'];
 
 const appState = {
+  // legacy top-level shape (kept for initial compatibility).
   entities: { characters: [], places: [], objects: [], lore: [] },
   chapters: [],
   acts: [],
   openCats: { characters: true, places: false, objects: false, lore: false },
-  sidebarCollapsed: false
+  sidebarCollapsed: false,
+  // New data-model: will be populated/migrated on load. Keep empty defaults so save/load code remains stable.
+  series: undefined,
+  currentSeriesId: undefined
 };
 
 const STORAGE_KEY = 'novel-planner-state-v1';
@@ -32,16 +36,102 @@ const appApi = {
   uid() {
     return 'id' + Math.random().toString(36).slice(2, 10);
   },
+  currentSeries() {
+    const sId = this.state.currentSeriesId;
+    if (this.state.series && Array.isArray(this.state.series)) {
+      return this.state.series.find((s) => s.id === sId) || this.state.series[0] || null;
+    }
+    return null;
+  },
+  currentBook() {
+    const series = this.currentSeries();
+    if (!series) return null;
+    const bId = series.currentBookId;
+    return (series.books && series.books.find((b) => b.id === bId)) || (series.books && series.books[0]) || null;
+  },
   async loadState() {
     const saved = await loadStoredValue(STORAGE_KEY);
+
+    // Helper to create the new Series/Book wrapper from legacy pieces
+    const makeSeriesFromLegacy = (legacy) => {
+      const seriesId = this.uid();
+      const bookId = this.uid();
+      const entities = legacy.entities || { characters: [], places: [], objects: [], lore: [] };
+      const chapters = legacy.chapters || [];
+      const acts = legacy.acts || [];
+      const openCats = legacy.openCats || { characters: true, places: false, objects: false, lore: false };
+      const sidebarCollapsed = legacy.sidebarCollapsed || false;
+
+      const series = {
+        id: seriesId,
+        name: 'Resonance',
+        world: {
+          codex: { entities },
+          ui: { openCats, sidebarCollapsed }
+        },
+        books: [
+          { id: bookId, name: 'Dissonance', chapters, acts }
+        ],
+        currentBookId: bookId
+      };
+      return { series: [series], currentSeriesId: seriesId };
+    };
+
     if (saved) {
-      Object.assign(this.state, saved);
+      // Detect new-style saved state
+      if (saved.series && Array.isArray(saved.series)) {
+        // saved already in new shape: use it, but keep legacy aliases for compatibility
+        Object.assign(this.state, saved);
+      } else {
+        // Legacy shape: migrate into new series/book wrapper
+        const wrapped = makeSeriesFromLegacy(saved);
+        Object.assign(this.state, wrapped);
+      }
+    } else {
+      // No saved data: create a default Series/Book using existing appState
+      const wrapped = makeSeriesFromLegacy(this.state);
+      Object.assign(this.state, wrapped);
     }
+
+    // Ensure legacy convenience properties mirror the current series/book for compatibility.
+    const syncAliases = () => {
+      const series = this.currentSeries();
+      const book = this.currentBook();
+      if (series && book) {
+        // point top-level convenience keys at nested data (initially reference same objects)
+        this.state.entities = series.world.codex.entities;
+        this.state.chapters = book.chapters;
+        this.state.acts = book.acts;
+        this.state.openCats = series.world.ui.openCats;
+        this.state.sidebarCollapsed = series.world.ui.sidebarCollapsed;
+      }
+    };
+
+    syncAliases();
+
     const storedImages = await loadStoredImages(IMG_PREFIX);
     this.images = storedImages;
     this.render();
   },
   async saveState() {
+    // Before saving, ensure top-level convenience props are copied into the nested series/book
+    try {
+      const series = this.currentSeries();
+      const book = this.currentBook();
+      if (series && book) {
+        // push any top-level mutations into the nested authoritative structure
+        series.world = series.world || { codex: { entities: { characters: [], places: [], objects: [], lore: [] } }, ui: { openCats: {}, sidebarCollapsed: false } };
+        series.world.codex.entities = this.state.entities || series.world.codex.entities;
+        series.world.ui = series.world.ui || { openCats: {}, sidebarCollapsed: false };
+        series.world.ui.openCats = this.state.openCats || series.world.ui.openCats;
+        series.world.ui.sidebarCollapsed = this.state.sidebarCollapsed || series.world.ui.sidebarCollapsed;
+
+        book.chapters = this.state.chapters || book.chapters;
+        book.acts = this.state.acts || book.acts;
+      }
+    } catch (e) {
+      console.error('State sync before save failed', e);
+    }
     await saveStoredValue(STORAGE_KEY, this.state);
   },
   async setItemImage(itemId, dataUrl) {

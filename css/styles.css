@@ -275,6 +275,19 @@
     font-family:'Inter',sans-serif; font-size:13.5px; background:#fff; color:var(--ink-text);
   }
   .field textarea{ resize:vertical; min-height:60px; }
+
+  /* Expanding textarea component */
+  .exp-toggle{
+    background:none; border:1px solid transparent; color:var(--steel); font-size:12px;
+    padding:3px 8px; border-radius:6px; margin-left:8px; cursor:pointer; vertical-align:middle;
+  }
+  .exp-toggle:hover{ border-color:var(--panel-edge); background:#fff; }
+  .exp-wrap{ display:block; }
+  .exp-textarea{ resize:none; min-height:60px; max-height:240px; overflow:hidden; transition:height .12s ease; }
+
+  /* When modal expands for long editing */
+  .modal.expanded-textarea{ width:720px; max-height:92vh; }
+  .modal.exp-text-expanded .exp-textarea{ max-height:70vh; }
   .char-toggle-list{ display:flex; flex-wrap:wrap; gap:6px; }
   .char-toggle{
     padding:5px 11px 5px 5px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer;

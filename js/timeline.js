@@ -1,4 +1,5 @@
 import { escapeHtml, linkifyText, wireCodexLinks } from './codex.js';
+import { initAllExpandingTextareas } from './expandingTextarea.js';
 
 const app = () => window.app;
 
@@ -199,8 +200,10 @@ export function openChapterModal(chapterId) {
       <input type="text" id="cm-title" value="${escapeHtml(chapter.title)}" placeholder="Chapter title...">
     </div>
     <div class="field">
-      <label>Summary</label>
-      <textarea id="cm-summary" placeholder="What happens in this chapter...">${escapeHtml(chapter.summary || '')}</textarea>
+      <label>Summary <button type="button" class="exp-toggle" data-target="cm-summary" title="Expand">⤡</button></label>
+      <div class="exp-wrap" data-target="cm-summary-wrap">
+        <textarea id="cm-summary" placeholder="What happens in this chapter...">${escapeHtml(chapter.summary || '')}</textarea>
+      </div>
     </div>
     <div class="field">
       <label>Act</label>
@@ -246,6 +249,7 @@ export function openChapterModal(chapterId) {
   });
 
   document.getElementById('chapterOverlay').classList.add('show');
+  initAllExpandingTextareas(modal);
   document.getElementById('cm-title').focus();
 
   document.getElementById('cm-cancel').addEventListener('click', closeChapterModal);
