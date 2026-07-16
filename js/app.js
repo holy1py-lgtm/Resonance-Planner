@@ -242,6 +242,7 @@ const appApi = {
 window.app = appApi;
 
 async function boot() {
+  await window.storageReady;
   initBooksModule();
   initTimelineModule();
   await appApi.loadState();
