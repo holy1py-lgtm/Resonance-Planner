@@ -49,6 +49,73 @@ const appApi = {
     const bId = series.currentBookId;
     return (series.books && series.books.find((b) => b.id === bId)) || (series.books && series.books[0]) || null;
   },
+  syncAliases() {
+    const series = this.currentSeries();
+    const book = this.currentBook();
+    if (series && book) {
+      this.state.entities = series.world && series.world.codex ? series.world.codex.entities : this.state.entities;
+      this.state.chapters = book.chapters || this.state.chapters;
+      this.state.acts = book.acts || this.state.acts;
+      this.state.openCats = (series.world && series.world.ui && series.world.ui.openCats) || this.state.openCats;
+      this.state.sidebarCollapsed = (series.world && series.world.ui && series.world.ui.sidebarCollapsed) || this.state.sidebarCollapsed;
+    }
+  },
+  async setCurrentSeries(seriesId) {
+    if (!seriesId) return;
+    this.state.currentSeriesId = seriesId;
+    // ensure currentBookId is valid
+    const series = this.currentSeries();
+    if (series && (!series.currentBookId || !series.books.find((b) => b.id === series.currentBookId))) {
+      series.currentBookId = series.books && series.books[0] ? series.books[0].id : null;
+    }
+    this.syncAliases();
+    await this.saveState();
+    this.render();
+  },
+  async setCurrentBook(bookId) {
+    const series = this.currentSeries();
+    if (!series) return;
+    if (!bookId) return;
+    series.currentBookId = bookId;
+    this.syncAliases();
+    await this.saveState();
+    this.render();
+  },
+  async addBook(name) {
+    const series = this.currentSeries();
+    if (!series) return null;
+    const bookId = this.uid();
+    const book = { id: bookId, name: name || 'Untitled Book', chapters: [], acts: [], ui: {} };
+    series.books = series.books || [];
+    series.books.push(book);
+    series.currentBookId = bookId;
+    // keep codex shared by reference (no copy)
+    this.syncAliases();
+    await this.saveState();
+    this.render();
+    return book;
+  },
+  async addSeries(name) {
+    const seriesId = this.uid();
+    const bookId = this.uid();
+    const series = {
+      id: seriesId,
+      name: name || 'Untitled Series',
+      world: {
+        codex: { entities: { characters: [], places: [], objects: [], lore: [] } },
+        ui: { openCats: { characters: true, places: false, objects: false, lore: false }, sidebarCollapsed: false }
+      },
+      books: [ { id: bookId, name: 'Book 1', chapters: [], acts: [] } ],
+      currentBookId: bookId
+    };
+    this.state.series = this.state.series || [];
+    this.state.series.push(series);
+    this.state.currentSeriesId = seriesId;
+    this.syncAliases();
+    await this.saveState();
+    this.render();
+    return series;
+  },
   async loadState() {
     const saved = await loadStoredValue(STORAGE_KEY);
 

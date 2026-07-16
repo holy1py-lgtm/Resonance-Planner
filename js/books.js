@@ -46,6 +46,39 @@ export function closeLightbox() {
 
 export function renderSidebar() {
   const currentApp = app();
+  // populate Series/Book selectors (UI-only controls)
+  try {
+    const seriesSelect = document.getElementById('series-select');
+    const bookSelect = document.getElementById('book-select');
+    if (seriesSelect) {
+      seriesSelect.innerHTML = '';
+      const seriesArr = currentApp.state.series || [];
+      seriesArr.forEach((s) => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name || 'Series';
+        seriesSelect.appendChild(opt);
+      });
+      const cur = currentApp.currentSeries ? currentApp.currentSeries() : null;
+      if (cur) seriesSelect.value = cur.id;
+    }
+    if (bookSelect) {
+      bookSelect.innerHTML = '';
+      const curSeries = currentApp.currentSeries ? currentApp.currentSeries() : null;
+      const books = (curSeries && curSeries.books) || [];
+      books.forEach((b) => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.textContent = b.name || 'Book';
+        bookSelect.appendChild(opt);
+      });
+      const curBook = currentApp.currentBook ? currentApp.currentBook() : null;
+      if (curBook) bookSelect.value = curBook.id;
+    }
+  } catch (e) {
+    // safe fail for UI-only feature
+    console.error('Series/Book selector render failed', e);
+  }
   const body = document.getElementById('sidebar-body');
   body.innerHTML = '';
 
@@ -346,4 +379,54 @@ export function initBooksModule() {
     event.target.value = '';
   });
   document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+  // wire series/book selectors to app state (UI -> state)
+  const currentApp = app();
+  const seriesSelect = document.getElementById('series-select');
+  const bookSelect = document.getElementById('book-select');
+  if (seriesSelect) {
+    seriesSelect.addEventListener('change', (event) => {
+      const val = event.target.value;
+      if (!val) return;
+      try {
+        currentApp.setCurrentSeries(val);
+      } catch (e) {
+        console.error('Failed to set current series', e);
+      }
+    });
+  }
+  if (bookSelect) {
+    bookSelect.addEventListener('change', (event) => {
+      const val = event.target.value;
+      if (!val) return;
+      try {
+        currentApp.setCurrentBook(val);
+      } catch (e) {
+        console.error('Failed to set current book', e);
+      }
+    });
+  }
+  const bookAddBtn = document.getElementById('book-add');
+  if (bookAddBtn) {
+    bookAddBtn.addEventListener('click', async () => {
+      const name = prompt('Book name:','New Book');
+      if (!name || !name.trim()) return;
+      try {
+        await currentApp.addBook(name.trim());
+      } catch (e) {
+        console.error('Failed to add new book', e);
+      }
+    });
+  }
+  const seriesAddBtn = document.getElementById('series-add');
+  if (seriesAddBtn) {
+    seriesAddBtn.addEventListener('click', async () => {
+      const name = prompt('Series name:','New Series');
+      if (!name || !name.trim()) return;
+      try {
+        await currentApp.addSeries(name.trim());
+      } catch (e) {
+        console.error('Failed to add new series', e);
+      }
+    });
+  }
 }

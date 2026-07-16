@@ -12,6 +12,27 @@
 
 <div id="app">
   <div id="sidebar">
+    <div id="series-controls">
+      <div id="series-breadcrumb">
+        <div class="crumb-row">
+          <div class="crumb-label">Project</div>
+          <div class="crumb-value" id="crumb-series">▼ Resonance</div>
+        </div>
+        <div class="crumb-row">
+          <div class="crumb-label">Book</div>
+          <div class="crumb-value" id="crumb-book">▼ Dissonance</div>
+        </div>
+        <div class="crumb-sep"></div>
+      </div>
+      <div class="select-row">
+        <select id="series-select"></select>
+        <button id="series-add" class="small-icon-btn" title="Add series">+</button>
+      </div>
+      <div class="select-row">
+        <select id="book-select"></select>
+        <button id="book-add" class="small-icon-btn" title="Add book">+</button>
+      </div>
+    </div>
     <div id="sidebar-header">
       <h1 class="title-text">Story Bible</h1>
       <button id="sidebar-toggle" title="Collapse">&#8676;</button>
@@ -28,6 +49,7 @@
     <div id="main-header">
       <div>
         <h2 class="display">Chapter Timeline</h2>
+        <div class="timeline-book-label" id="timeline-book-label">Book: Dissonance</div>
         <p>Drag a chapter card to reorder it. Click the corner arrow to shrink or expand a card, or click a card's body to edit it.</p>
       </div>
       <div id="header-actions">

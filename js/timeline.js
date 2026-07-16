@@ -142,12 +142,17 @@ function buildActDivider(act) {
 }
 
 export function renderTimeline() {
-  const track = document.getElementById('timeline-track');
-  track.innerHTML = '';
+   const appInstance = app();
+   const label = document.getElementById('timeline-book-label');
+   if (label) {
+     const currentBook = appInstance.currentBook ? appInstance.currentBook() : null;
+     label.textContent = `Book: ${currentBook ? currentBook.name : 'Dissonance'}`;
+   }
+   const track = document.getElementById('timeline-track');
+   track.innerHTML = '';
 
-  const chapters = app().state.chapters;
-  const acts = app().state.acts || [];
-
+   const chapters = appInstance.state.chapters;
+   const acts = appInstance.state.acts || [];
   if (acts.length === 0) {
     track.appendChild(buildChapterGroup(chapters));
   } else {
