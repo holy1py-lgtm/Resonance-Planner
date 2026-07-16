@@ -69,8 +69,8 @@ async function ensureStorageAdapter() {
   if (!initializationPromise) {
     initializationPromise = (async () => {
       try {
-        const firebaseAppModule = await import('https://www.gstatic.com/firebasejs/10.14.2/firebase-app.js');
-        const firebaseFirestoreModule = await import('https://www.gstatic.com/firebasejs/10.14.2/firebase-firestore.js');
+        const firebaseAppModule = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js');
+        const firebaseFirestoreModule = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
 
         const { initializeApp } = firebaseAppModule;
         const {
