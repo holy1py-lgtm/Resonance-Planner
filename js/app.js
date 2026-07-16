@@ -118,6 +118,7 @@ const appApi = {
   },
   async loadState() {
     const saved = await loadStoredValue(STORAGE_KEY);
+    console.log("LOADED FROM FIRESTORE", saved);
 
     // Helper to create the new Series/Book wrapper from legacy pieces
     const makeSeriesFromLegacy = (legacy) => {
